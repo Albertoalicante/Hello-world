@@ -14,18 +14,20 @@
 </head>
 <body>
   <h1>WebAR Demo</h1>
-  <p>A Basic demo of WebAR using Google's model-viewer component.</p>
+  <p>A Basic demo of Nenuco WebAR using Google's model-viewer component.</p>
   <div id="card">
-    <model-viewer alt="its just a box" 
-      src="../modelos/nenuco_parapruebas_2b.glb" 
-     
-      background-color="#afe" 
-      shadow-intensity="1" 
-      camera-controls 
-      interaction-prompt="auto" 
-      ar 
-      quick-look-browsers="safari chrome">
-    </model-viewer>
+    <model-viewer  src="../modelos/nenuco_parapruebas_2b.glb" 
+	ar-scale="auto"
+	camera-controls
+	autoplay animation-name="Boca"
+	ar ar-modes="scene-viewer webxr quick-look"
+	shadow-intensity="1"
+	shadow-softness="0.5"
+	auto-rotate
+  alt="A 3D model of Nenuco" >
+
+
+</model-viewer>
   </div>
   <script type="module" src="https://unpkg.com/@google/model-viewer@v0.6.2/dist/model-viewer.js">
   </script>
