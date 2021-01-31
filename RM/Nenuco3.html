@@ -14,7 +14,7 @@
 </head>
 <body>
   <h1>WebAR Demo</h1>
-  <p>A Basic demo of WebAR using Google's model-viewer component.</p>
+  <p>A Basic demo of WebAR using Google's model-viewer component Y un Nenuco.</p>
   <div id="card">
     <model-viewer alt="its just a box" 
       src="../modelos/nenuco_parapruebas_2b.glb" 
@@ -22,9 +22,10 @@
     
       shadow-intensity="1" 
       camera-controls 
+	autoplay animation-name="Boca"
+	ar ar-modes="scene-viewer webxr quick-look"
       interaction-prompt="auto" 
       ar 
-      quick-look-browsers="safari chrome">
     </model-viewer>
   </div>
   <script type="module" src="https://unpkg.com/@google/model-viewer@v0.6.2/dist/model-viewer.js">
