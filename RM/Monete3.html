@@ -1,4 +1,12 @@
-<!-- Import the component -->
+<!-- Use it like any other HTML element -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+
+ <!-- Import the component -->
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
     <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
@@ -12,21 +20,17 @@
     
     <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
     <script src="https://unpkg.com/focus-visible@5.0.2/dist/focus-visible.js" defer></script>
+	
+  <title>Sabadode monadas</title>
+</head>
 
-<!-- Use it like any other HTML element -->
-
-
-<!DOCTYPE html>
-<html>
-  <title>GorilaSabado/title>
 <body>
-
-<h1>Monete</h1>
-
-<p>Gorila</p>
- <div id="card">
+  <h1>WebAR Demo</h1>
+  <p>A Basic demo of WebAR using Google's model-viewer component Rafika powered.</p>
+  <div id="card">
+  
 <model-viewer  src="https://albertoalicante.github.io/Hello-world/modelos/Cubos.glb" 
-	 ios-src="https://albertoalicante.github.io/Hello-world/modelos/Gorila_Mano.usdc"
+			  ios-src="https://albertoalicante.github.io/Hello-world/modelos/Water_Queen_15.usdz"
 			 	ar-scale="auto"
 	camera-controls
 	autoplay animation-name="ArmatureAction"
@@ -34,13 +38,13 @@
 	shadow-intensity="1"
 	shadow-softness="1"
 	auto-rotate
-			  alt="A 3D model of Gorila" >
+			  alt="A 3D model of an Pinypon Princess" >
 
 
 </model-viewer>
 
+    
   </div>
-
 
 
 </body>
