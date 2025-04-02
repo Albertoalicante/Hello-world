@@ -29,12 +29,18 @@
   <p>A Basic demo of WebAR using Google's model-viewer component and Nenuco Runner.</p>
   <div id="card">
     
-    <model-viewer src="../modelos/Nenuco_Corre_poco_80.glb" 
-                  ios-src="https://albertoalicante.github.io/Hello-world/modelos/Nenuco_Corre_poco_80..usdz"
-    camera-controls 
-    ar ar-modes="scene-viewer webxr quick-look" 
-     
-    shadow-intensity="1">
+<model-viewer  style="width: 100%; height: 500px; top: 0px;"
+        bounds="tight" src="https://albertoalicante.github.io/Hello-world/modelos/Nenuco_Arms_HipHopDance.glb"	 
+	ar-scale="auto"
+	camera-controls
+	autoplay
+	ar ar-modes="scene-viewer webxr quick-look"
+	shadow-intensity="1"
+	shadow-softness="1"
+	auto-rotate
+    <div class="progress-bar hide" slot="progress-bar">
+        <div class="update-bar"></div>
+    </div>
 
 </model-viewer>
 
