@@ -2,129 +2,96 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Casa FEBER Plegable - Interactiva</title>
+    <title>Casa FEBER Plegable WIP</title>
 
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
-            text-align: center;
-        }
-
-        h1 { color: #333; }
-        .instrucciones { color: #666; font-size: 0.9em; margin-bottom: 20px; }
-
+        body { font-family: sans-serif; text-align: center; margin: 0; padding: 20px; background-color: #f0f0f0; }
+        
         #card {
-            position: relative;
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            height: 500px;
+            background: #fff;
+            border-radius: 12px;
+            position: relative; /* Importante para el posicionamiento */
             overflow: hidden;
         }
 
         model-viewer {
             width: 100%;
-            height: 500px;
-            background-color: #eee;
+            height: 100%;
+            --poster-color: transparent;
         }
 
-        /* Contenedor del botón dentro del visor */
-        #contenedor-controles {
+        /* ESTILO CRÍTICO PARA ANDROID */
+        #btn-animacion {
             position: absolute;
-            bottom: 20px;
+            bottom: 50px; /* Separado del borde inferior */
             left: 50%;
             transform: translateX(-50%);
-            z-index: 10;
-        }
-
-        /* Estilo del botón interactivo */
-        #btn-animacion {
-            background-color: #2ecc71;
+            z-index: 100; /* Asegura que esté por encima del canvas */
+            
+            padding: 12px 20px;
+            background-color: #007bff;
             color: white;
             border: none;
-            padding: 15px 25px;
-            border-radius: 30px;
-            font-size: 16px;
+            border-radius: 25px;
             font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            pointer-events: auto; /* Fuerza que responda a clics */
+            display: block !important; /* Evita que se oculte */
         }
 
-        #btn-animacion:active {
-            transform: scale(0.95);
-        }
-
-        #btn-animacion.pausado {
-            background-color: #e74c3c;
-        }
+        #btn-animacion:active { background-color: #0056b3; }
     </style>
 </head>
 <body>
 
     <h1>Casa FEBER Plegable</h1>
-    <div class="instrucciones">
-        <p>Esto es para verlo con animación y sin ella.</p>
-        <p>En AR, acepta los permisos de cámara "siempre" o "mientras se visita".</p>
-    </div>
+    <p>Toca el botón azul para mover la casa.</p>
 
     <div id="card">
-        
         <model-viewer id="modeloCasa"
             src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
-            ar 
+            ar
             ar-modes="webxr scene-viewer quick-look"
             camera-controls
             shadow-intensity="1"
-            shadow-softness="1"
-            auto-rotate
-            bounds="tight">
+            auto-rotate>
 
-            <div id="contenedor-controles" slot="ui">
-                <button id="btn-animacion">▶ REPRODUCIR</button>
-            </div>
+            <button id="btn-animacion" slot="ui">
+                ▶ REPRODUCIR
+            </button>
 
             <div class="progress-bar hide" slot="progress-bar">
                 <div class="update-bar"></div>
             </div>
         </model-viewer>
-
     </div>
 
     <script>
         const modelViewer = document.querySelector("#modeloCasa");
         const boton = document.querySelector("#btn-animacion");
 
-        // Función para controlar la animación
         boton.addEventListener("click", (event) => {
-            // Evita que el toque en el botón rote el modelo por error
+            // Evita que el clic sea ignorado por el visor 3D
+            event.preventDefault();
             event.stopPropagation();
 
             if (modelViewer.paused) {
                 modelViewer.play();
                 boton.textContent = "⏸ PAUSAR";
-                boton.classList.add("pausado");
+                boton.style.backgroundColor = "#dc3545"; // Rojo al reproducir
             } else {
                 modelViewer.pause();
                 boton.textContent = "▶ REPRODUCIR";
-                boton.classList.remove("pausado");
+                boton.style.backgroundColor = "#007bff"; // Azul al pausar
             }
         });
-
-        // Opcional: Asegurarnos de que el botón sepa si la animación termina sola
-        modelViewer.addEventListener('finished', () => {
-            boton.textContent = "▶ REPRODUCIR";
-            boton.classList.remove("pausado");
-        });
     </script>
-
 </body>
 </html>
