@@ -3,91 +3,71 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Casa FEBER Plegable</title>
-
+    <title>FEBER Interactiva3</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #f4f4f4; }
-        
-        /* Contenedor del visor */
-        .visor-container {
-            width: 100vw;
-            height: 80vh;
-            position: relative;
+        body { margin: 0; font-family: sans-serif; }
+        model-viewer { width: 100vw; height: 90vh; background-color: #f0f0f0; }
+
+        /* Estilo del botón tipo Hotspot */
+        .boton-animacion {
+            background: #27ae60;
+            border-radius: 25px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            color: white;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            /* IMPORTANTE: permite que los toques pasen a través del contenedor si no es en el botón */
+            pointer-events: auto; 
         }
 
-        model-viewer {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* BOTÓN EXTERNO TOTALMENTE INDEPENDIENTE */
-        #btn-animacion {
-            position: fixed; /* Se queda fijo en la pantalla, pase lo que pase */
-            bottom: 30px;
+        /* Contenedor que no bloquea el zoom/rotación */
+        .controls {
+            position: absolute;
+            bottom: 50px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 2147483647; /* El máximo valor de z-index posible */
-            
-            padding: 18px 30px;
-            background-color: #27ae60;
-            color: white;
-            border: 4px solid white;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: bold;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            
-            /* Evita que el botón sea invisible en algunos modos AR */
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
+            pointer-events: none; /* Los toques 'atraviesan' el div y llegan al modelo */
+            z-index: 100;
         }
-
-        #btn-animacion.pausa { background-color: #e74c3c; }
+        
+        .boton-animacion:active { background: #c0392b; }
     </style>
 </head>
 <body>
 
-    <div class="visor-container">
-        <model-viewer id="modeloCasa"
-            src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
-            ar
-            ar-modes="webxr quick-look" 
-            camera-controls
-            shadow-intensity="1"
-            auto-rotate>
-            
-            </model-viewer>
+    <model-viewer id="modelo"
+        src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
+        ar
+        ar-modes="webxr quick-look" 
+        camera-controls
+        shadow-intensity="1">
 
-        <button id="btn-animacion">▶ REPRODUCIR</button>
-    </div>
+        <div class="controls" slot="ui">
+            <button class="boton-animacion" id="play-pause">
+                ▶ REPRODUCIR
+            </button>
+        </div>
+
+    </model-viewer>
 
     <script>
-        const modelViewer = document.querySelector("#modeloCasa");
-        const boton = document.querySelector("#btn-animacion");
+        const modelViewer = document.querySelector("#modelo");
+        const btn = document.querySelector("#play-pause");
 
-        // Función para alternar animación
-        boton.addEventListener("click", () => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Evita que el modelo se mueva al clicar el botón
             if (modelViewer.paused) {
                 modelViewer.play();
-                boton.textContent = "⏸ PAUSAR";
-                boton.classList.add("pausa");
+                btn.textContent = "⏸ PAUSAR";
+                btn.style.background = "#e74c3c";
             } else {
                 modelViewer.pause();
-                boton.textContent = "▶ REPRODUCIR";
-                boton.classList.remove("pausa");
-            }
-        });
-
-        // IMPORTANTE: Si entra en AR, Google Chrome a veces oculta el DOM.
-        // Este evento intenta forzar la visibilidad del botón.
-        modelViewer.addEventListener('ar-status', (event) => {
-            if(event.detail.status === 'session-started'){
-                boton.style.position = 'fixed';
-                boton.style.zIndex = '2147483647';
+                btn.textContent = "▶ REPRODUCIR";
+                btn.style.background = "#27ae60";
             }
         });
     </script>
