@@ -8,42 +8,39 @@
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <style>
-        body { margin: 0; padding: 0; }
+        body { margin: 0; padding: 0; }<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Casa FEBER - Control Oficial</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+    <style>
+        /* Estilos base para asegurar que el visor ocupe la pantalla */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
         
-        /* Esto es lo que usa la documentación oficial para evitar que los botones 
-           aparezcan antes de que el modelo cargue, pero si falla, los oculta siempre. 
-           Lo hemos simplificado para asegurar visibilidad. */
         model-viewer {
-            width: 100vw;
-            height: 100vh;
-            background-color: #f0f0f0;
+            width: 100%;
+            height: 100%;
+            background-color: #f7f7f7;
         }
 
-        /* PANEL DE CONTROLES (Estilo exacto de modelviewer.dev) */
-        #controls {
+        /* EL PANEL DE CONTROLES (Copiado de la lógica de modelviewer.dev) */
+        .controls {
             position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 250px;
-            z-index: 20; /* Aseguramos que esté al frente */
+            bottom: 24px;
+            left: 24px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            font-family: Arial, sans-serif;
+            z-index: 100;
+            display: block !important; /* Forzamos que no desaparezca */
         }
 
-        .row {
-            display: flex;
-            justify-content: space-between;
-            font-family: sans-serif;
-            font-size: 14px;
-        }
-
-        /* El botón de AR nativo que Google espera */
+        /* Botón de AR personalizado */
         #ar-button {
             background-image: url(https://modelviewer.dev/assets/ic_view_in_ar_new_googblue_48dp.png);
             background-repeat: no-repeat;
@@ -54,7 +51,7 @@
             left: 50%;
             transform: translateX(-50%);
             white-space: nowrap;
-            bottom: 160px; /* Ajustado para estar sobre el panel */
+            bottom: 132px;
             padding: 0px 16px 0px 40px;
             font-family: Roboto Regular, Helvetica Neue, sans-serif;
             font-size: 14px;
@@ -63,10 +60,13 @@
             line-height: 36px;
             border-radius: 18px;
             border: 1px solid #DADCE0;
-            z-index: 30;
         }
 
-        /* IMPORTANTE: Los slots de model-viewer solo funcionan si el elemento es HIJO DIRECTO */
+        #ar-button:active { background-color: #E8EAED; }
+        #ar-button:focus { outline: none; }
+        #ar-button:focus-visible { outline: 1px solid #4285f4; }
+
+        .slider { width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -78,49 +78,51 @@
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
         autoplay
-        shadow-intensity="1">
+        shadow-intensity="1"
+        alt="Casa FEBER Plegable">
 
         <button slot="ar-button" id="ar-button">
-            VER EN TU ESPACIO
+            VER EN AR
         </button>
 
-        <div id="controls" slot="ui">
-            <div class="row">
-                <span>Velocidad:</span>
-                <span id="speed-val">1.0x</span>
-            </div>
-            <input type="range" id="speed-slider" min="0" max="2" step="0.1" value="1" style="width: 100%;">
+        <div class="controls" slot="ui">
+            <div>Velocidad: <span id="speed-label">1.0</span>x</div>
+            <input id="speed-slider" class="slider" type="range" min="0" max="2" step="0.1" value="1">
             
-            <div style="display: flex; gap: 5px;">
-                <button id="pause" style="flex: 1; padding: 10px; cursor: pointer;">Pausar</button>
-                <button id="play" style="flex: 1; padding: 10px; cursor: pointer;">Play</button>
+            <div style="margin-top: 10px; display: flex; gap: 5px;">
+                <button id="play" style="flex:1">Play</button>
+                <button id="pause" style="flex:1">Pausa</button>
             </div>
         </div>
 
     </model-viewer>
 
     <script>
-        const modelViewer = document.querySelector("#casa");
-        const slider = document.querySelector("#speed-slider");
-        const speedText = document.querySelector("#speed-val");
+        const modelViewer = document.querySelector('#casa');
+        const slider = document.querySelector('#speed-slider');
+        const label = document.querySelector('#speed-label');
 
-        slider.addEventListener("input", (event) => {
-            const v = event.target.value;
-            modelViewer.timeScale = v;
-            speedText.textContent = v + "x";
+        // Control de velocidad directo
+        slider.addEventListener('input', () => {
+            modelViewer.timeScale = slider.value;
+            label.textContent = slider.value;
         });
 
-        document.querySelector("#pause").addEventListener("click", () => {
-            modelViewer.timeScale = 0;
-            slider.value = 0;
-            speedText.textContent = "0x";
-        });
-
-        document.querySelector("#play").addEventListener("click", () => {
+        document.querySelector('#play').onclick = () => {
             modelViewer.timeScale = 1;
             slider.value = 1;
-            speedText.textContent = "1.0x";
-        });
+            label.textContent = "1.0";
+        };
+
+        document.querySelector('#pause').onclick = () => {
+            modelViewer.timeScale = 0;
+            slider.value = 0;
+            label.textContent = "0";
+        };
+
+        // Evitar que el modelo "robe" el clic al panel
+        document.querySelector('.controls').addEventListener('click', (e) => e.stopPropagation());
+        document.querySelector('.controls').addEventListener('touchstart', (e) => e.stopPropagation());
     </script>
 </body>
 </html>
