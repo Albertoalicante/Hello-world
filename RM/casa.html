@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Casa FEBER - Sistema Dinámico</title>
+    <title>Casa FEBER - Estilo Google Oficial</title>
     
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
@@ -11,118 +11,104 @@
         body { margin: 0; font-family: sans-serif; }
         model-viewer { width: 100vw; height: 100vh; background-color: #eee; }
 
-        /* Estilo del panel que crearemos por JS */
+        /* Estilo 'Glass' del ejemplo de Google */
         .controls {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
             padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             z-index: 100;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            width: 250px;
+            gap: 8px;
+            min-width: 200px;
         }
 
-        .row { display: flex; justify-content: space-between; align-items: center; }
-        
+        .controls label {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #444;
+        }
+
         input[type="range"] { width: 100%; cursor: pointer; }
 
-        button { 
-            padding: 8px; 
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer;
-            flex: 1;
-        }
-
-        /* Botón AR obligatorio */
         #ar-button {
             position: absolute;
             top: 20px;
             right: 20px;
-            z-index: 101;
-            padding: 10px;
+            padding: 10px 15px;
             background: white;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 20px;
+            z-index: 101;
         }
     </style>
 </head>
 <body>
 
-    <model-viewer id="modeloCasa"
+    <model-viewer id="append-demo" 
+        camera-controls 
+        touch-action="pan-y" 
+        ar 
+        ar-modes="webxr scene-viewer" 
+        shadow-intensity="1" 
         src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
-        ar
-        ar-modes="webxr quick-look"
-        camera-controls
-        autoplay
-        shadow-intensity="1">
+        alt="Casa FEBER Plegable">
         
-        <button slot="ar-button" id="ar-button">VER EN CASA</button>
-
-        <div class="controls" id="container-controles" slot="ui"></div>
+        <button slot="ar-button" id="ar-button">📦 VER EN AR</button>
+        
+        <div class="controls">
+            </div>
     </model-viewer>
 
     <script>
-        (() => {
-            const modelViewer = document.querySelector('#modeloCasa');
-            const controlsPanel = document.querySelector('#container-controles');
+      (() => {
+        const modelViewer = document.querySelector('#append-demo');
+        const controlsPanel = document.querySelector('#append-demo .controls');
 
-            // Esta función "dibuja" los botones solo cuando el modelo carga
-            const loadModelAnimations = () => {
-                console.log("Modelo cargado, inyectando controles...");
-                
-                // Limpiamos por si acaso
-                controlsPanel.innerHTML = `
-                    <div class="row">
-                        <span>Velocidad:</span>
-                        <b id="val-velocidad">1.0x</b>
-                    </div>
-                    <input type="range" id="slider-velocidad" min="0" max="2" step="0.1" value="1">
-                    <div class="row" style="gap:5px;">
-                        <button id="btn-play">PLAY</button>
-                        <button id="btn-pause" style="background:#dc3545">PAUSA</button>
-                    </div>
-                `;
+        // Esta función se activa cuando el modelo termina de cargar
+        modelViewer.addEventListener("load", loadModelAnimations);
 
-                // Ahora que existen, les ponemos los listeners
-                const slider = document.querySelector('#slider-velocidad');
-                const valLabel = document.querySelector('#val-velocidad');
-                const btnPlay = document.querySelector('#btn-play');
-                const btnPause = document.querySelector('#btn-pause');
+        function loadModelAnimations() {
+          // Limpiamos el panel
+          controlsPanel.innerHTML = "";
+          
+          console.log("Animaciones detectadas:", modelViewer.availableAnimations);
 
-                slider.addEventListener('input', (event) => {
-                    modelViewer.timeScale = event.target.value;
-                    valLabel.textContent = event.target.value + "x";
-                });
+          // Recorremos las animaciones que trae el archivo .glb de la casa
+          modelViewer.availableAnimations.forEach(animationName => {
+            // Creamos un slider por cada animación encontrada (excepto poses estáticas)
+            if (animationName !== "TPose") {
+              controlsPanel.innerHTML += `
+                <label for="${animationName}">${animationName}</label>
+                <input id="${animationName}" type="range" min="0" max="1" step="0.01" value="0">
+              `;
+            }
+          });
 
-                btnPlay.addEventListener('click', () => {
-                    modelViewer.play();
-                    modelViewer.timeScale = 1;
-                    slider.value = 1;
-                    valLabel.textContent = "1.0x";
-                });
+          // Ponemos a escuchar a todos los sliders creados
+          controlsPanel.querySelectorAll("input[type='range']").forEach(slider => {
+            slider.addEventListener("input", updateAnimation);
+          });
+        }
 
-                btnPause.addEventListener('click', () => {
-                    modelViewer.pause();
-                    modelViewer.timeScale = 0;
-                    slider.value = 0;
-                    valLabel.textContent = "0x";
-                });
+        function updateAnimation(event) {
+          // El método clave de Google: appendAnimation
+          // Controla el "peso" de la animación (0 es cerrada, 1 es abierta)
+          modelViewer.appendAnimation(event.target.id, {
+            weight: parseFloat(event.target.value)
+          });
+        }
 
-                // Evitar que el toque en el panel afecte al modelo 3D
-                controlsPanel.addEventListener('pointerdown', (e) => e.stopPropagation());
-            };
+        // Bloqueamos que el toque en los controles mueva la casa
+        controlsPanel.addEventListener('pointerdown', (e) => e.stopPropagation());
 
-            // Escuchamos el evento LOAD igual que en la web oficial
-            modelViewer.addEventListener("load", loadModelAnimations);
-        })();
+      })();
     </script>
 </body>
 </html>
