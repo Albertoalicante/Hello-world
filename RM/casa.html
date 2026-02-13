@@ -3,119 +3,124 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Casa FEBER - Test Final</title>
+    <title>Casa FEBER - Versión Oficial</title>
+    
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <style>
-        body { margin: 0; padding: 0; height: 100vh; font-family: sans-serif; }
+        body { margin: 0; padding: 0; }
         
-        /* Contenedor del visor */
-        .wrapper {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
+        /* Esto es lo que usa la documentación oficial para evitar que los botones 
+           aparezcan antes de que el modelo cargue, pero si falla, los oculta siempre. 
+           Lo hemos simplificado para asegurar visibilidad. */
         model-viewer {
-            width: 100%;
-            height: 100%;
-            background-color: #ffffff;
+            width: 100vw;
+            height: 100vh;
+            background-color: #f0f0f0;
         }
 
-        /* PANEL DE CONTROLES - Estilo ultra-compatible */
-        .controls {
+        /* PANEL DE CONTROLES (Estilo exacto de modelviewer.dev) */
+        #controls {
             position: absolute;
             bottom: 20px;
-            left: 10px;
-            right: 10px;
-            background-color: white; /* Color sólido, sin transparencias */
-            border: 2px solid #333;
-            border-radius: 10px;
-            padding: 15px;
-            z-index: 999; /* Por encima de todo */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Botón AR estilo nativo pero posicionado más arriba */
-        #ar-button {
-            position: absolute;
-            bottom: 160px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 10px 20px;
-            background: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 14px;
-            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 250px;
+            z-index: 20; /* Aseguramos que esté al frente */
         }
 
-        input[type="range"] {
-            width: 80%;
-            height: 30px;
+        .row {
+            display: flex;
+            justify-content: space-between;
+            font-family: sans-serif;
+            font-size: 14px;
         }
+
+        /* El botón de AR nativo que Google espera */
+        #ar-button {
+            background-image: url(https://modelviewer.dev/assets/ic_view_in_ar_new_googblue_48dp.png);
+            background-repeat: no-repeat;
+            background-size: 20px 20px;
+            background-position: 12px 50%;
+            background-color: #fff;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            bottom: 160px; /* Ajustado para estar sobre el panel */
+            padding: 0px 16px 0px 40px;
+            font-family: Roboto Regular, Helvetica Neue, sans-serif;
+            font-size: 14px;
+            color: #4285f4;
+            height: 36px;
+            line-height: 36px;
+            border-radius: 18px;
+            border: 1px solid #DADCE0;
+            z-index: 30;
+        }
+
+        /* IMPORTANTE: Los slots de model-viewer solo funcionan si el elemento es HIJO DIRECTO */
     </style>
 </head>
 <body>
 
-    <div class="wrapper">
-        <model-viewer id="casa"
-            src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
-            ar
-            ar-modes="webxr scene-viewer quick-look"
-            camera-controls
-            autoplay
-            shadow-intensity="1">
+    <model-viewer 
+        id="casa"
+        src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        camera-controls
+        autoplay
+        shadow-intensity="1">
 
-            <button slot="ar-button" id="ar-button">
-                VER EN REALIDAD AUMENTADA
-            </button>
+        <button slot="ar-button" id="ar-button">
+            VER EN TU ESPACIO
+        </button>
 
-            <div class="controls" slot="ui" id="panel-controles">
-                <div style="margin-bottom: 10px;">VELOCIDAD: <span id="val">1.0</span>x</div>
-                <input type="range" id="slider" min="0" max="2" step="0.1" value="1">
-                
-                <div style="margin-top: 10px;">
-                    <button id="btn-0" style="padding: 10px;">PARAR</button>
-                    <button id="btn-1" style="padding: 10px;">PLAY</button>
-                </div>
+        <div id="controls" slot="ui">
+            <div class="row">
+                <span>Velocidad:</span>
+                <span id="speed-val">1.0x</span>
             </div>
+            <input type="range" id="speed-slider" min="0" max="2" step="0.1" value="1" style="width: 100%;">
+            
+            <div style="display: flex; gap: 5px;">
+                <button id="pause" style="flex: 1; padding: 10px; cursor: pointer;">Pausar</button>
+                <button id="play" style="flex: 1; padding: 10px; cursor: pointer;">Play</button>
+            </div>
+        </div>
 
-        </model-viewer>
-    </div>
+    </model-viewer>
 
     <script>
-        const model = document.querySelector('#casa');
-        const slider = document.querySelector('#slider');
-        const valText = document.querySelector('#val');
-        const pnl = document.querySelector('#panel-controles');
+        const modelViewer = document.querySelector("#casa");
+        const slider = document.querySelector("#speed-slider");
+        const speedText = document.querySelector("#speed-val");
 
-        // Asegurar que el panel se vea después de cargar
-        model.addEventListener('load', () => {
-            pnl.style.display = 'flex';
-            console.log("Cargado");
+        slider.addEventListener("input", (event) => {
+            const v = event.target.value;
+            modelViewer.timeScale = v;
+            speedText.textContent = v + "x";
         });
 
-        slider.addEventListener('input', (e) => {
-            const v = e.target.value;
-            model.timeScale = v;
-            valText.textContent = v;
-        });
-
-        document.querySelector('#btn-0').onclick = () => {
-            model.timeScale = 0;
+        document.querySelector("#pause").addEventListener("click", () => {
+            modelViewer.timeScale = 0;
             slider.value = 0;
-            valText.textContent = "0";
-        };
+            speedText.textContent = "0x";
+        });
 
-        document.querySelector('#btn-1').onclick = () => {
-            model.timeScale = 1;
+        document.querySelector("#play").addEventListener("click", () => {
+            modelViewer.timeScale = 1;
             slider.value = 1;
-            valText.textContent = "1.0";
-        };
+            speedText.textContent = "1.0x";
+        });
     </script>
 </body>
 </html>
