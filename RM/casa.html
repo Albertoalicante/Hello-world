@@ -3,139 +3,126 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Casa FEBER - Sistema Oficial</title>
+    <title>Casa FEBER - Sistema Dinámico</title>
     
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <style>
-        body { margin: 0; padding: 0; width: 100vw; height: 100vh; }
-        
-        /* Esto evita que los controles floten antes de que el modelo cargue */
-        :not(:defined) > * { display: none; }
+        body { margin: 0; font-family: sans-serif; }
+        model-viewer { width: 100vw; height: 100vh; background-color: #eee; }
 
-        model-viewer {
-            width: 100%;
-            height: 100%;
-            background-color: #f7f7f7;
-            overflow: hidden;
-        }
-
-        /* PANEL DE CONTROLES: Estilo idéntico al ejemplo de Google */
-        #controls {
+        /* Estilo del panel que crearemos por JS */
+        .controls {
             position: absolute;
-            bottom: 24px;
-            left: 24px;
+            bottom: 20px;
+            left: 20px;
             background: white;
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
-            font-family: Arial, Helvetica, sans-serif;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             z-index: 100;
-        }
-
-        .control-row {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            gap: 15px;
+            flex-direction: column;
+            gap: 10px;
+            width: 250px;
         }
 
-        #speed-slider {
-            width: 150px;
+        .row { display: flex; justify-content: space-between; align-items: center; }
+        
+        input[type="range"] { width: 100%; cursor: pointer; }
+
+        button { 
+            padding: 8px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
             cursor: pointer;
+            flex: 1;
         }
 
-        button {
-            padding: 6px 12px;
-            cursor: pointer;
-            background: #eee;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        /* Botón AR obligatorio para que aparezca el icono de Google */
+        /* Botón AR obligatorio */
         #ar-button {
-            background-image: url(https://modelviewer.dev/assets/ic_view_in_ar_new_googblue_48dp.png);
-            background-repeat: no-repeat;
-            background-size: 20px 20px;
-            background-position: 12px 50%;
-            background-color: #fff;
             position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: 150px;
-            padding: 0px 16px 0px 40px;
-            font-family: Roboto Regular, sans-serif;
-            font-size: 14px;
-            color: #4285f4;
-            height: 36px;
-            line-height: 36px;
-            border-radius: 18px;
-            border: 1px solid #DADCE0;
+            top: 20px;
+            right: 20px;
+            z-index: 101;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
 
-    <model-viewer 
-        id="casa-demo"
+    <model-viewer id="modeloCasa"
         src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
         ar
         ar-modes="webxr quick-look"
         camera-controls
         autoplay
         shadow-intensity="1">
+        
+        <button slot="ar-button" id="ar-button">VER EN CASA</button>
 
-        <button slot="ar-button" id="ar-button">
-            VER EN joo ESPACIO
-        </button>
-
-        <div id="controls" slot="ui">
-            <div class="control-row">
-                <span>Velocidad: <span id="val">1.0</span>x</span>
-            </div>
-            <div class="control-row">
-                <input type="range" id="speed-slider" min="0" max="2" step="0.1" value="1">
-            </div>
-            <div class="control-row">
-                <button id="play">Play</button>
-                <button id="pause">Pausa</button>
-            </div>
-        </div>
-
+        <div class="controls" id="container-controles" slot="ui"></div>
     </model-viewer>
 
     <script>
-        const modelViewer = document.querySelector("#casa-demo");
-        const slider = document.querySelector("#speed-slider");
-        const valText = document.querySelector("#val");
+        (() => {
+            const modelViewer = document.querySelector('#modeloCasa');
+            const controlsPanel = document.querySelector('#container-controles');
 
-        // IMPORTANTE: model-viewer usa 'timeScale' para la velocidad
-        slider.addEventListener('input', () => {
-            modelViewer.timeScale = slider.value;
-            valText.textContent = slider.value;
-        });
+            // Esta función "dibuja" los botones solo cuando el modelo carga
+            const loadModelAnimations = () => {
+                console.log("Modelo cargado, inyectando controles...");
+                
+                // Limpiamos por si acaso
+                controlsPanel.innerHTML = `
+                    <div class="row">
+                        <span>Velocidad:</span>
+                        <b id="val-velocidad">1.0x</b>
+                    </div>
+                    <input type="range" id="slider-velocidad" min="0" max="2" step="0.1" value="1">
+                    <div class="row" style="gap:5px;">
+                        <button id="btn-play">PLAY</button>
+                        <button id="btn-pause" style="background:#dc3545">PAUSA</button>
+                    </div>
+                `;
 
-        document.querySelector('#play').onclick = () => {
-            modelViewer.play();
-            modelViewer.timeScale = 1;
-            slider.value = 1;
-            valText.textContent = "1.0";
-        };
+                // Ahora que existen, les ponemos los listeners
+                const slider = document.querySelector('#slider-velocidad');
+                const valLabel = document.querySelector('#val-velocidad');
+                const btnPlay = document.querySelector('#btn-play');
+                const btnPause = document.querySelector('#btn-pause');
 
-        document.querySelector('#pause').onclick = () => {
-            modelViewer.pause();
-            modelViewer.timeScale = 0;
-            slider.value = 0;
-            valText.textContent = "0";
-        };
+                slider.addEventListener('input', (event) => {
+                    modelViewer.timeScale = event.target.value;
+                    valLabel.textContent = event.target.value + "x";
+                });
 
-        // Evitar que el panel bloquee los gestos en el modelo
-        const controls = document.querySelector('#controls');
-        ['pointerdown', 'mousedown', 'touchstart'].forEach((event) => {
-            controls.addEventListener(event, (e) => e.stopPropagation());
-        });
+                btnPlay.addEventListener('click', () => {
+                    modelViewer.play();
+                    modelViewer.timeScale = 1;
+                    slider.value = 1;
+                    valLabel.textContent = "1.0x";
+                });
+
+                btnPause.addEventListener('click', () => {
+                    modelViewer.pause();
+                    modelViewer.timeScale = 0;
+                    slider.value = 0;
+                    valLabel.textContent = "0x";
+                });
+
+                // Evitar que el toque en el panel afecte al modelo 3D
+                controlsPanel.addEventListener('pointerdown', (e) => e.stopPropagation());
+            };
+
+            // Escuchamos el evento LOAD igual que en la web oficial
+            modelViewer.addEventListener("load", loadModelAnimations);
+        })();
     </script>
 </body>
 </html>
