@@ -3,22 +3,32 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Casa FEBER Plegable WIP</title>
+    <title>Casa FEBER Plegable</title>
 
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <style>
-        body { font-family: sans-serif; text-align: center; margin: 0; padding: 20px; background-color: #f0f0f0; }
-        
-        #card {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            height: 500px;
+        body { 
+            font-family: sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            background-color: #f0f0f0;
+        }
+
+        .header { padding: 20px; text-align: center; }
+
+        /* Contenedor principal */
+        #container {
+            position: relative;
+            width: 90vw;
+            height: 70vh;
             background: #fff;
-            border-radius: 12px;
-            position: relative; /* Importante para el posicionamiento */
-            overflow: hidden;
+            border: 2px solid #ccc;
+            border-radius: 15px;
+            overflow: visible; /* IMPORTANTE: Permitir que el botón se vea */
         }
 
         model-viewer {
@@ -27,34 +37,48 @@
             --poster-color: transparent;
         }
 
-        /* ESTILO CRÍTICO PARA ANDROID */
+        /* BOTÓN FLOTANTE: Estilo reforzado */
         #btn-animacion {
+            /* Posicionamiento */
             position: absolute;
-            bottom: 50px; /* Separado del borde inferior */
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 100; /* Asegura que esté por encima del canvas */
+            z-index: 9999 !important; /* Por encima de todo */
             
-            padding: 12px 20px;
+            /* Apariencia */
+            display: block;
+            padding: 15px 25px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 50px;
+            font-size: 16px;
             font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            pointer-events: auto; /* Fuerza que responda a clics */
-            display: block !important; /* Evita que se oculte */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            
+            /* Interacción */
+            cursor: pointer;
+            touch-action: manipulation;
         }
 
-        #btn-animacion:active { background-color: #0056b3; }
+        /* Estilo cuando está en reproducción */
+        #btn-animacion.playing {
+            background-color: #ff4757;
+        }
+
+        /* Ocultar la barra de progreso por si estorba */
+        .progress-bar { display: none; }
     </style>
 </head>
 <body>
 
-    <h1>Casa FEBER Plegable</h1>
-    <p>Toca el botón azul para mover la casa.</p>
+    <div class="header">
+        <h1>Casa FEBER Plegable</h1>
+        <p>Si no ves el botón, intenta recargar la página.</p>
+    </div>
 
-    <div id="card">
+    <div id="container">
         <model-viewer id="modeloCasa"
             src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
             ar
@@ -64,33 +88,36 @@
             auto-rotate>
 
             <button id="btn-animacion" slot="ui">
-                ▶ REPRODUCIR
+                ▶ REPRODUCIR ANIMACIÓN
             </button>
 
-            <div class="progress-bar hide" slot="progress-bar">
-                <div class="update-bar"></div>
-            </div>
         </model-viewer>
     </div>
 
     <script>
+        // Esperamos a que el componente esté listo
         const modelViewer = document.querySelector("#modeloCasa");
         const boton = document.querySelector("#btn-animacion");
 
         boton.addEventListener("click", (event) => {
-            // Evita que el clic sea ignorado por el visor 3D
-            event.preventDefault();
+            // Detenemos la propagación para que el modelo no reciba el "tap"
             event.stopPropagation();
+            event.preventDefault();
 
             if (modelViewer.paused) {
                 modelViewer.play();
-                boton.textContent = "⏸ PAUSAR";
-                boton.style.backgroundColor = "#dc3545"; // Rojo al reproducir
+                boton.textContent = "⏸ PAUSAR ANIMACIÓN";
+                boton.classList.add("playing");
             } else {
                 modelViewer.pause();
-                boton.textContent = "▶ REPRODUCIR";
-                boton.style.backgroundColor = "#007bff"; // Azul al pausar
+                boton.textContent = "▶ REPRODUCIR ANIMACIÓN";
+                boton.classList.remove("playing");
             }
+        });
+
+        // Verificación por consola para diagnóstico
+        modelViewer.addEventListener('load', () => {
+            console.log("Modelo cargado. Animaciones disponibles:", modelViewer.availableAnimations);
         });
     </script>
 </body>
