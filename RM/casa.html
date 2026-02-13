@@ -3,127 +3,131 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Casa FEBER - Control Oficial</title>
+    <title>Casa FEBER - Clon de Ejemplo Oficial</title>
     
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <style>
-        body { margin: 0; }
-        :not(:defined) > * { display: none; }
+      /* ESTILOS EXTRAÍDOS DIRECTAMENTE DEL EJEMPLO DE GOOGLE */
+      body { margin: 0; padding: 0; width: 100vw; height: 100vh; }
+      
+      model-viewer {
+        width: 100%;
+        height: 100%;
+        background-color: #f7f7f7;
+      }
 
-        model-viewer {
-            width: 100vw;
-            height: 100vh;
-            background-color: #eee;
-            overflow: hidden;
-        }
+      /* Esta es la clase que usa el ejemplo oficial para el panel */
+      .controls {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        max-width: 300px;
+        background: white;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        font-family: sans-serif;
+        /* IMPORTANTE: z-index alto para evitar que el canvas lo tape */
+        z-index: 100; 
+      }
 
-        /* El contenedor de controles debe seguir este esquema exacto para no desaparecer */
-        #controls {
-            position: absolute;
-            bottom: 16px;
-            left: 16px;
-            max-width: 250px;
-            background: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
-            font-family: Arial, sans-serif;
-            z-index: 10;
-        }
+      .control-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 5px 0;
+      }
 
-        .control-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
+      #ar-button {
+        background-image: url(https://modelviewer.dev/assets/ic_view_in_ar_new_googblue_48dp.png);
+        background-repeat: no-repeat;
+        background-size: 20px 20px;
+        background-position: 12px 50%;
+        background-color: #fff;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        bottom: 132px;
+        padding: 0px 16px 0px 40px;
+        font-family: Roboto Regular, Helvetica Neue, sans-serif;
+        font-size: 14px;
+        color: #4285f4;
+        height: 36px;
+        line-height: 36px;
+        border-radius: 18px;
+        border: 1px solid #DADCE0;
+      }
 
-        input[type="range"] {
-            width: 100%;
-            cursor: pointer;
-        }
-
-        /* Botón de AR oficial */
-        #ar-button {
-            background-image: url(https://modelviewer.dev/assets/ic_view_in_ar_new_googblue_48dp.png);
-            background-repeat: no-repeat;
-            background-size: 20px 20px;
-            background-position: 12px 50%;
-            background-color: #fff;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            bottom: 132px;
-            padding: 0px 16px 0px 40px;
-            font-family: Roboto Regular, Helvetica Neue, sans-serif;
-            font-size: 14px;
-            color: #4285f4;
-            height: 36px;
-            line-height: 36px;
-            border-radius: 18px;
-            border: 1px solid #DADCE0;
-        }
+      /* Evita el parpadeo inicial */
+      :not(:defined) > * {
+        display: none;
+      }
     </style>
 </head>
 <body>
 
-    <model-viewer 
-        id="anim-casa"
-        src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
-        ar
-        ar-modes="webxr scene-viewer quick-look"
-        camera-controls
-        autoplay
-        shadow-intensity="1">
+  <model-viewer 
+    id="anim-demo"
+    src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    camera-controls
+    autoplay
+    shadow-intensity="1">
 
-        <button slot="ar-button" id="ar-button">
-            VER EN el ESPACIO
-        </button>
+    <button slot="ar-button" id="ar-button">
+      VER EN TUuu ESPACIO
+    </button>
 
-        <div id="controls" slot="ui">
-            <div class="control-row">
-                <span>Velocidad:</span>
-                <span id="speed-display">1x</span>
-            </div>
-            <input type="range" id="speed-slider" min="0" max="2" step="0.1" value="1">
-            
-            <div class="control-row" style="margin-top: 10px;">
-                <button id="play-btn" style="flex:1; margin-right:4px;">Play</button>
-                <button id="pause-btn" style="flex:1;">Pausa</button>
-            </div>
-        </div>
+    <div class="controls" slot="ui">
+      <div class="control-row">
+        <span>Velocidad:</span>
+        <span id="speed-label">1.0x</span>
+      </div>
+      <div class="control-row">
+        <input id="speed-slider" type="range" min="0" max="2" step="0.1" value="1" style="width: 100%;">
+      </div>
+      <div class="control-row" style="gap: 5px; margin-top: 10px;">
+        <button id="play" style="flex: 1; padding: 5px;">Play</button>
+        <button id="pause" style="flex: 1; padding: 5px;">Pausa</button>
+      </div>
+    </div>
 
-    </model-viewer>
+  </model-viewer>
 
-    <script>
-        const modelViewer = document.querySelector('#anim-casa');
-        const speedSlider = document.querySelector('#speed-slider');
-        const speedDisplay = document.querySelector('#speed-display');
+  <script>
+    const modelViewer = document.querySelector('#anim-demo');
+    const slider = document.querySelector('#speed-slider');
+    const label = document.querySelector('#speed-label');
 
-        // Escuchar el evento 'load' es vital para que el componente no borre la UI
-        modelViewer.addEventListener('load', () => {
-            console.log("Modelo cargado correctamente");
-            
-            // Sincronizar el slider con la velocidad real
-            speedSlider.addEventListener('input', () => {
-                modelViewer.timeScale = speedSlider.value;
-                speedDisplay.textContent = speedSlider.value + 'x';
-            });
+    // IMPORTANTE: El ejemplo oficial a veces usa 'timeScale'
+    // Pero solo funciona si la animación ya se está reproduciendo
+    slider.addEventListener('input', () => {
+      modelViewer.timeScale = slider.value;
+      label.textContent = slider.value + 'x';
+    });
 
-            document.querySelector('#play-btn').onclick = () => {
-                modelViewer.timeScale = 1;
-                speedSlider.value = 1;
-                speedDisplay.textContent = '1x';
-            };
+    document.querySelector('#play').addEventListener('click', () => {
+      modelViewer.play();
+      modelViewer.timeScale = 1;
+      slider.value = 1;
+      label.textContent = "1.0x";
+    });
 
-            document.querySelector('#pause-btn').onclick = () => {
-                modelViewer.timeScale = 0;
-                speedSlider.value = 0;
-                speedDisplay.textContent = '0x';
-            };
-        });
-    </script>
+    document.querySelector('#pause').addEventListener('click', () => {
+      modelViewer.pause();
+      // También ponemos la escala a 0 por seguridad
+      modelViewer.timeScale = 0; 
+      slider.value = 0;
+      label.textContent = "0x";
+    });
+
+    // Esta línea previene que el toque en el panel afecte al modelo 3D
+    document.querySelector('.controls').addEventListener('pointerdown', (event) => {
+      event.stopPropagation();
+    });
+  </script>
 </body>
 </html>
