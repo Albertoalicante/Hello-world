@@ -3,72 +3,123 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>FEBER Interactiva3</title>
+    <title>Casa FEBER - Control de Velocidad</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <style>
-        body { margin: 0; font-family: sans-serif; }
-        model-viewer { width: 100vw; height: 90vh; background-color: #f0f0f0; }
+        body { margin: 0; font-family: sans-serif; background-color: #f4f4f4; }
+        
+        #container { width: 100vw; height: 100vh; }
 
-        /* Estilo del botón tipo Hotspot */
-        .boton-animacion {
-            background: #27ae60;
-            border-radius: 25px;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
-            color: white;
-            padding: 10px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            /* IMPORTANTE: permite que los toques pasen a través del contenedor si no es en el botón */
-            pointer-events: auto; 
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
         }
 
-        /* Contenedor que no bloquea el zoom/rotación */
+        /* Panel de controles similar al de modelviewer.dev */
         .controls {
             position: absolute;
-            bottom: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-            pointer-events: none; /* Los toques 'atraviesan' el div y llegan al modelo */
-            z-index: 100;
+            bottom: 40px;
+            left: 20px;
+            right: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            
+            /* Esto permite que si tocas fuera de los botones, el modelo rote */
+            pointer-events: none; 
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
         }
-        
-        .boton-animacion:active { background: #c0392b; }
+
+        .controls > * {
+            pointer-events: auto; /* Los botones y sliders sí reciben clics */
+        }
+
+        .slider-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: none;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:active { background: #0056b3; }
     </style>
 </head>
 <body>
 
-    <model-viewer id="modelo"
-        src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
-        ar
-        ar-modes="webxr quick-look" 
-        camera-controls
-        shadow-intensity="1">
+    <div id="container">
+        <model-viewer id="modeloCasa"
+            src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
+            ar
+            ar-modes="webxr quick-look"
+            camera-controls
+            autoplay
+            shadow-intensity="1">
 
-        <div class="controls" slot="ui">
-            <button class="boton-animacion" id="play-pause">
-                ▶ REPRODUCIR
-            </button>
-        </div>
+            <div class="controls" slot="ui">
+                <div class="slider-label">Velocidad de Animación: <span id="val">1x</span></div>
+                <input type="range" id="speed" min="0" max="2" step="0.1" value="1">
+                
+                <div class="btn-group">
+                    <button id="stop">Detener</button>
+                    <button id="normal">Normal (1x)</button>
+                </div>
+            </div>
 
-    </model-viewer>
+        </model-viewer>
+    </div>
 
     <script>
-        const modelViewer = document.querySelector("#modelo");
-        const btn = document.querySelector("#play-pause");
+        const modelViewer = document.querySelector("#modeloCasa");
+        const speedSlider = document.querySelector("#speed");
+        const speedLabel = document.querySelector("#val");
+        const stopBtn = document.querySelector("#stop");
+        const normalBtn = document.querySelector("#normal");
 
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation(); // Evita que el modelo se mueva al clicar el botón
-            if (modelViewer.paused) {
-                modelViewer.play();
-                btn.textContent = "⏸ PAUSAR";
-                btn.style.background = "#e74c3c";
-            } else {
-                modelViewer.pause();
-                btn.textContent = "▶ REPRODUCIR";
-                btn.style.background = "#27ae60";
-            }
+        // Cambiar la velocidad dinámicamente
+        speedSlider.addEventListener("input", (event) => {
+            const speed = event.target.value;
+            modelViewer.timeScale = speed; // Esta es la propiedad clave
+            speedLabel.textContent = speed + "x";
+        });
+
+        // Botón de parada rápida
+        stopBtn.addEventListener("click", () => {
+            modelViewer.timeScale = 0;
+            speedSlider.value = 0;
+            speedLabel.textContent = "0x";
+        });
+
+        // Botón de reset a 1x
+        normalBtn.addEventListener("click", () => {
+            modelViewer.timeScale = 1;
+            speedSlider.value = 1;
+            speedLabel.textContent = "1x";
         });
     </script>
 </body>
