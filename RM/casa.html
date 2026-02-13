@@ -3,132 +3,139 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Casa FEBER - Test EventListeners</title>
+    <title>Casa FEBER - Sistema Oficial</title>
     
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <style>
-        body { margin: 0; font-family: sans-serif; background: #ccc; }
+        body { margin: 0; padding: 0; width: 100vw; height: 100vh; }
         
-        .viewer-wrapper {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
+        /* Esto evita que los controles floten antes de que el modelo cargue */
+        :not(:defined) > * { display: none; }
 
         model-viewer {
             width: 100%;
             height: 100%;
-            background-color: #ffffff;
+            background-color: #f7f7f7;
+            overflow: hidden;
         }
 
-        /* PANEL DE CONTROLES EXTERNO */
-        #panel-controles {
-            position: fixed;
-            bottom: 20px;
+        /* PANEL DE CONTROLES: Estilo idéntico al ejemplo de Google */
+        #controls {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            font-family: Arial, Helvetica, sans-serif;
+            z-index: 100;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            gap: 15px;
+        }
+
+        #speed-slider {
+            width: 150px;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 6px 12px;
+            cursor: pointer;
+            background: #eee;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Botón AR obligatorio para que aparezca el icono de Google */
+        #ar-button {
+            background-image: url(https://modelviewer.dev/assets/ic_view_in_ar_new_googblue_48dp.png);
+            background-repeat: no-repeat;
+            background-size: 20px 20px;
+            background-position: 12px 50%;
+            background-color: #fff;
+            position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 350px;
-            background: #fff;
-            padding: 20px;
-            border: 3px solid #000; /* Borde negro para que se vea sí o sí */
-            border-radius: 15px;
-            z-index: 999999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .botones { display: flex; gap: 10px; }
-
-        #btn-play { background: #28a745; color: white; padding: 15px; border: none; border-radius: 5px; flex: 1; font-weight: bold; cursor: pointer; }
-        #btn-pause { background: #dc3545; color: white; padding: 15px; border: none; border-radius: 5px; flex: 1; font-weight: bold; cursor: pointer; }
-        
-        input[type="range"] { width: 100%; height: 20px; }
-
-        /* Botón AR obligatorio */
-        #ar-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 10px;
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            z-index: 1000;
+            bottom: 150px;
+            padding: 0px 16px 0px 40px;
+            font-family: Roboto Regular, sans-serif;
+            font-size: 14px;
+            color: #4285f4;
+            height: 36px;
+            line-height: 36px;
+            border-radius: 18px;
+            border: 1px solid #DADCE0;
         }
     </style>
 </head>
 <body>
 
-    <div class="viewer-wrapper">
-        <model-viewer id="modelo"
-            src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
-            ar
-            ar-modes="webxr scene-viewer quick-look"
-            camera-controls
-            autoplay
-            shadow-intensity="1">
-            
-            <button slot="ar-button" id="ar-button">📦 VER EN AR</button>
-        </model-viewer>
+    <model-viewer 
+        id="casa-demo"
+        src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
+        ar
+        ar-modes="webxr quick-look"
+        camera-controls
+        autoplay
+        shadow-intensity="1">
 
-        <div id="panel-controles">
-            <div style="text-align: center; font-weight: bold; margin-bottom: 5px;">
-                Velocidad: <span id="txt-velocidad">1.0</span>x
+        <button slot="ar-button" id="ar-button">
+            VER EN joo ESPACIO
+        </button>
+
+        <div id="controls" slot="ui">
+            <div class="control-row">
+                <span>Velocidad: <span id="val">1.0</span>x</span>
             </div>
-            
-            <input type="range" id="selector-velocidad" min="0" max="2" step="0.1" value="1">
-            
-            <div class="botones">
-                <button id="btn-play">PLAY</button>
-                <button id="btn-pause">PAUSA</button>
+            <div class="control-row">
+                <input type="range" id="speed-slider" min="0" max="2" step="0.1" value="1">
+            </div>
+            <div class="control-row">
+                <button id="play">Play</button>
+                <button id="pause">Pausa</button>
             </div>
         </div>
-    </div>
+
+    </model-viewer>
 
     <script>
-        // Esperamos a que TODA la página cargue
-        window.addEventListener('load', () => {
-            console.log("Página cargada. Configurando Event Listeners...");
+        const modelViewer = document.querySelector("#casa-demo");
+        const slider = document.querySelector("#speed-slider");
+        const valText = document.querySelector("#val");
 
-            const casa = document.getElementById('modelo');
-            const slider = document.getElementById('selector-velocidad');
-            const etiqueta = document.getElementById('txt-velocidad');
-            const btnPlay = document.getElementById('btn-play');
-            const btnPause = document.getElementById('btn-pause');
+        // IMPORTANTE: model-viewer usa 'timeScale' para la velocidad
+        slider.addEventListener('input', () => {
+            modelViewer.timeScale = slider.value;
+            valText.textContent = slider.value;
+        });
 
-            // 1. Event Listener para el Slider
-            slider.addEventListener('input', () => {
-                const valor = slider.value;
-                casa.timeScale = valor;
-                etiqueta.innerText = valor;
-                console.log("Velocidad cambiada a:", valor);
-            });
+        document.querySelector('#play').onclick = () => {
+            modelViewer.play();
+            modelViewer.timeScale = 1;
+            slider.value = 1;
+            valText.textContent = "1.0";
+        };
 
-            // 2. Event Listener para el botón Play
-            btnPlay.addEventListener('click', () => {
-                casa.play();
-                casa.timeScale = 1;
-                slider.value = 1;
-                etiqueta.innerText = "1.0";
-            });
+        document.querySelector('#pause').onclick = () => {
+            modelViewer.pause();
+            modelViewer.timeScale = 0;
+            slider.value = 0;
+            valText.textContent = "0";
+        };
 
-            // 3. Event Listener para el botón Pausa
-            btnPause.addEventListener('click', () => {
-                casa.pause();
-                casa.timeScale = 0;
-                slider.value = 0;
-                etiqueta.innerText = "0";
-            });
-
-            // Evitar que el panel interfiera con el giro de la casa
-            const panel = document.getElementById('panel-controles');
-            panel.addEventListener('pointerdown', (e) => e.stopPropagation());
-            panel.addEventListener('mousedown', (e) => e.stopPropagation());
+        // Evitar que el panel bloquee los gestos en el modelo
+        const controls = document.querySelector('#controls');
+        ['pointerdown', 'mousedown', 'touchstart'].forEach((event) => {
+            controls.addEventListener(event, (e) => e.stopPropagation());
         });
     </script>
-
 </body>
 </html>
