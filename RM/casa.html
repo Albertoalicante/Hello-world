@@ -8,116 +8,87 @@
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <style>
-        body { 
-            font-family: sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            background-color: #f0f0f0;
-        }
-
-        .header { padding: 20px; text-align: center; }
-
-        /* Contenedor principal */
-        #container {
+        body { margin: 0; font-family: sans-serif; background-color: #f4f4f4; }
+        
+        /* Contenedor del visor */
+        .visor-container {
+            width: 100vw;
+            height: 80vh;
             position: relative;
-            width: 90vw;
-            height: 70vh;
-            background: #fff;
-            border: 2px solid #ccc;
-            border-radius: 15px;
-            overflow: visible; /* IMPORTANTE: Permitir que el botón se vea */
         }
 
         model-viewer {
             width: 100%;
             height: 100%;
-            --poster-color: transparent;
+            display: block;
         }
 
-        /* BOTÓN FLOTANTE: Estilo reforzado */
+        /* BOTÓN EXTERNO TOTALMENTE INDEPENDIENTE */
         #btn-animacion {
-            /* Posicionamiento */
-            position: absolute;
-            bottom: 20px;
+            position: fixed; /* Se queda fijo en la pantalla, pase lo que pase */
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 9999 !important; /* Por encima de todo */
+            z-index: 2147483647; /* El máximo valor de z-index posible */
             
-            /* Apariencia */
-            display: block;
-            padding: 15px 25px;
-            background-color: #007bff;
+            padding: 18px 30px;
+            background-color: #27ae60;
             color: white;
-            border: none;
+            border: 4px solid white;
             border-radius: 50px;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
             
-            /* Interacción */
-            cursor: pointer;
-            touch-action: manipulation;
+            /* Evita que el botón sea invisible en algunos modos AR */
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
-        /* Estilo cuando está en reproducción */
-        #btn-animacion.playing {
-            background-color: #ff4757;
-        }
-
-        /* Ocultar la barra de progreso por si estorba */
-        .progress-bar { display: none; }
+        #btn-animacion.pausa { background-color: #e74c3c; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Casa FEBER Plegable</h1>
-        <p>Si no ves el botón, intenta recargar la página.</p>
-    </div>
-
-    <div id="container">
+    <div class="visor-container">
         <model-viewer id="modeloCasa"
             src="https://albertoalicante.github.io/Hello-world/modelos/Casja_Plegable_Visor45b.glb"
             ar
-            ar-modes="webxr scene-viewer quick-look"
+            ar-modes="webxr quick-look" 
             camera-controls
             shadow-intensity="1"
             auto-rotate>
+            
+            </model-viewer>
 
-            <button id="btn-animacion" slot="ui">
-                ▶ REPRODUCIR ANIMACIÓN
-            </button>
-
-        </model-viewer>
+        <button id="btn-animacion">▶ REPRODUCIR</button>
     </div>
 
     <script>
-        // Esperamos a que el componente esté listo
         const modelViewer = document.querySelector("#modeloCasa");
         const boton = document.querySelector("#btn-animacion");
 
-        boton.addEventListener("click", (event) => {
-            // Detenemos la propagación para que el modelo no reciba el "tap"
-            event.stopPropagation();
-            event.preventDefault();
-
+        // Función para alternar animación
+        boton.addEventListener("click", () => {
             if (modelViewer.paused) {
                 modelViewer.play();
-                boton.textContent = "⏸ PAUSAR ANIMACIÓN";
-                boton.classList.add("playing");
+                boton.textContent = "⏸ PAUSAR";
+                boton.classList.add("pausa");
             } else {
                 modelViewer.pause();
-                boton.textContent = "▶ REPRODUCIR ANIMACIÓN";
-                boton.classList.remove("playing");
+                boton.textContent = "▶ REPRODUCIR";
+                boton.classList.remove("pausa");
             }
         });
 
-        // Verificación por consola para diagnóstico
-        modelViewer.addEventListener('load', () => {
-            console.log("Modelo cargado. Animaciones disponibles:", modelViewer.availableAnimations);
+        // IMPORTANTE: Si entra en AR, Google Chrome a veces oculta el DOM.
+        // Este evento intenta forzar la visibilidad del botón.
+        modelViewer.addEventListener('ar-status', (event) => {
+            if(event.detail.status === 'session-started'){
+                boton.style.position = 'fixed';
+                boton.style.zIndex = '2147483647';
+            }
         });
     </script>
 </body>
